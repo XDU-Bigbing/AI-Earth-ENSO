@@ -18,21 +18,18 @@
 
 # EDA 进度
 
+- [x] [读取nc格式文件方法](http://www.clarmy.net/2018/11/01/python%E8%AF%BB%E5%8F%96nc%E6%96%87%E4%BB%B6%E7%9A%84%E5%85%A5%E9%97%A8%E7%BA%A7%E6%93%8D%E4%BD%9C/)
+- [x] 转换成 `pandas` 或 `numpy`，处理与分析容易
+- [x] 填充值需要注意
+
 ## SODA EDA
 
-### train
+无填充值。
 
-- [x] [读取nc格式文件方法](http://www.clarmy.net/2018/11/01/python%E8%AF%BB%E5%8F%96nc%E6%96%87%E4%BB%B6%E7%9A%84%E5%85%A5%E9%97%A8%E7%BA%A7%E6%93%8D%E4%BD%9C/)
-- [x] 填充值需要处理一下
-- [x] 转换成 `pandas` 或 `numpy`，处理与分析容易
-
-### label
+- [x] 数据集透视完毕，包括数据维度、填充值分析与数据分布
+- [x] 标签集透视完毕，包括填充值分析、去除重叠数据后的可视化
 
 ## CMIP EDA
-
-### train
-
-### label
 
 - [ ]
 
