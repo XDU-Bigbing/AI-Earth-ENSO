@@ -166,6 +166,7 @@ class ConvLSTM(nn.Module):
 
         seq_len = input_tensor.size(1)
         cur_layer_input = input_tensor
+        print(cur_layer_input[:, 1, :, :, :].size())
 
         for layer_idx in range(self.num_layers):
 
@@ -214,3 +215,26 @@ class ConvLSTM(nn.Module):
         if not isinstance(param, list):
             param = [param] * num_layers
         return param
+
+
+if __name__ == "__main__":
+
+    channels = 16
+
+    # (batch大小, 序列长度, 通道数, 高度, 宽度)
+    x = torch.rand((32, 10, channels, 128, 128))
+
+    # 输入维度, 隐藏维度, kernel大小, 层数，batch在先，含有偏执项，返回全部层
+    convlstm = ConvLSTM(input_dim=channels,
+                    hidden_dim=[64, 64, 128],
+                    kernel_size=(3, 3),
+                    num_layers=3,
+                    batch_first=True,
+                    bias=True,
+                    return_all_layers=False)
+
+    # 返回最后的状态
+    _, last_states = convlstm(x)
+
+    # 第一个 0 是层的 index，第二个 0 是 h 状态的索引
+    h = last_states[0][0]
