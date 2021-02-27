@@ -57,6 +57,7 @@ class ConvLSTMCell(nn.Module):
         g = torch.tanh(cc_g)
 
         # 更新状态
+        # shape : [batchsize, hidden_dim, height, width]
         c_next = f * c_cur + i * g
         # 产生输出
         h_next = o * torch.tanh(c_next)
@@ -124,7 +125,8 @@ class ConvLSTM(nn.Module):
 
         cell_list = []
         for i in range(0, self.num_layers):
-            # [channel, 64], [64, 64], [64, 128]
+            # h 的输出维度是 hidden_dim，所以能对接上
+            # [channel, hidden_dim] [hidden_dim, hidden_dim]
             cur_input_dim = self.input_dim if i == 0 else self.hidden_dim[i - 1]
 
             cell_list.append(ConvLSTMCell(input_dim=cur_input_dim,
@@ -166,7 +168,6 @@ class ConvLSTM(nn.Module):
 
         seq_len = input_tensor.size(1)
         cur_layer_input = input_tensor
-        print(cur_layer_input[:, 1, :, :, :].size())
 
         for layer_idx in range(self.num_layers):
 
@@ -238,3 +239,20 @@ if __name__ == "__main__":
 
     # 第一个 0 是层的 index，第二个 0 是 h 状态的索引
     h = last_states[0][0]
+
+    # print(convlstm)
+    '''
+    ConvLSTM(
+        (cell_list): ModuleList(
+            (0): ConvLSTMCell(
+            (conv): Conv2d(80, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+            (1): ConvLSTMCell(
+            (conv): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+            (2): ConvLSTMCell(
+            (conv): Conv2d(192, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+        )
+    )
+    '''
