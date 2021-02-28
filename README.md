@@ -39,4 +39,5 @@
 ## 模型构建
 
 - [x] ConvLSTM 神经单元实现
-- [ ] Conv3dLSTM 神经单元实现
+- [x] Conv3dLSTM 神经单元实现
+- [ ] Conv3dLSTM 神经单元适配到多层网路
