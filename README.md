@@ -33,11 +33,23 @@
 
 有填充值，`t300`缺失3055032条，`ua`缺失13921123条，`ua`和`va`的缺失数据分布相同。
 
-- [x] 数据集透视完毕，包括数据维度、填充值分析与数据分布。`t300`缺失的数据年份为[1812, 1962]，`ua, va`缺失的数据年份为[755, 1962]，共755条。
+- [x] 数据集透视完毕，包括数据维度、填充值分析与数据分布。`t300`缺失的数据年份为[1812, 1962]，即第13个模式缺失；`ua, va`缺失的数据年份为[755, 1962]，第6到第13个模式消失。共755条。
 - [x] 标签集透视完毕，包括填充值分析、去除重叠数据后的可视化。
 
-## 模型构建
+# 模型构建进度
 
-- [x] ConvLSTM 神经单元实现
-- [x] Conv3dLSTM 神经单元实现
-- [ ] Conv3dLSTM 神经单元适配到多层网路
+- `seq_length` 原始序列长度
+- `custom_length` 指定窗口大小
+
+- [x] Conv2dLSTM 神经单元实现与适配到多层网络（训练读入的是单个元素）
+```
+Input  x : (batch_size, seq_length, channels, height, width)
+Output h : (batch_size, seq_length, hidden_dim, height, width)
+       c : (batch_size, seq_length, hidden_dim, height, width)
+```
+- [x] Conv3dLSTM 神经单元实现与适配到多层网络（训练读入一个序列的元素）
+```
+Input  x : (batch_size, channels, seq_length, height, width)
+Output h : (batch_size, hidden_dim, seq_length, height, width)
+       c : (batch_size, hidden_dim, seq_length, height, width)
+```

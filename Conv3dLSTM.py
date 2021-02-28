@@ -43,8 +43,6 @@ class ConvLSTMCell(nn.Module):
         h_cur, c_cur = cur_state
 
         # dim=1 横向拼接
-        print(input_tensor.size())
-        print(h_cur.size())
         combined = torch.cat([input_tensor, h_cur], dim=1)
 
         combined_conv = self.conv(combined)
@@ -152,12 +150,8 @@ class ConvLSTM(nn.Module):
         layer_output_list = []
         last_state_list = []
 
-        # 每次取出的窗口长度
-        seq_len = 4
-        # 每次的移动步伐
-        step = 1
         # 序列长度
-        length = input_tensor.size(1)
+        length = input_tensor.size(2)
 
         # batch, height, width
         b, _, _, h, w = input_tensor.size()
@@ -168,7 +162,7 @@ class ConvLSTM(nn.Module):
         else:
             # 初试化状态为 0
             hidden_state = self._init_hidden(batch_size=b,
-                                             length=seq_len,
+                                             length=length,
                                              image_size=(h, w))
 
         cur_layer_input = input_tensor
@@ -176,24 +170,17 @@ class ConvLSTM(nn.Module):
         for layer_idx in range(self.num_layers):
 
             h, c = hidden_state[layer_idx]
-            output_inner = []
-            # 一个一个的输入序列元素
-            for t in range(0, length - seq_len, step):
-                # 这一层训练一个序列
-                h, c = self.cell_list[layer_idx](input_tensor=cur_layer_input[:, :, t:t+seq_len, :, :],
-                                                 cur_state=[h, c])
-                # 每个序列元素一个输出
-                # 也就是，每层网络之间的状态 c 是断的
-                output_inner.append(h)
+            # 读入一个序列
+            h, c = self.cell_list[layer_idx](input_tensor=cur_layer_input[:, :, :, :, :],
+                                             cur_state=[h, c])
 
+            # 每层网络之间的状态 c 是断的
             # 一个序列在一层的输出
-            # layer_output = torch.stack(output_inner, dim=1)
-            
             # 下一层的输入
-            # torch.Size([2, 64, 4, 50, 50])
-            cur_layer_input = output_inner[-1]
+            # cur_layer_input = output_inner[-1]
+            cur_layer_input = h
 
-            # layer_output_list.append(layer_output)
+            layer_output_list.append(h)
             last_state_list.append([h, c])
 
         # 如果只要最后一层的输出，否则返回每一层的输出
@@ -225,14 +212,15 @@ class ConvLSTM(nn.Module):
 
 if __name__ == "__main__":
 
-    in_channels = 11
-    out_channels = 12
-    hidden_dim = [64]
-    kernel_size = (3, 3, 3)
-    height, width = 50, 50
-    dilation = (2, 2, 2)
-    batch_size = 2
+    in_channels = 36
+    out_channels = 16
     length = 12
+    num_layers = 3
+    hidden_dim = [32, 64, 128]
+    kernel_size = (3, 3, 3)
+    height, width = 24, 72
+    dilation = (2, 2, 2)
+    batch_size = 8
 
     padding = tuple(dilation[i] * (kernel_size[i] - 1) // 2 for i in range(3))
 
@@ -245,7 +233,7 @@ if __name__ == "__main__":
                     kernel_size=kernel_size,
                     dilation=dilation,
                     padding=padding,
-                    num_layers=1,
+                    num_layers=num_layers,
                     bias=True,
                     return_all_layers=False)
     
@@ -257,18 +245,22 @@ if __name__ == "__main__":
     # 第一个 0 是层的 index，第二个 0 是 h 状态的索引
     h = last_states[0][0]
 
+    print(x.size())
+    print(h.size())
+
     '''
     ConvLSTM(
         (cell_list): ModuleList(
-            (0): ConvLSTMCell(
-            (conv): Conv2d(80, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (0): ConvLSTMCell(    
+            (conv): Conv3d(68, 128, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(2, 2, 2), dilation=(2, 2, 2))
             )
             (1): ConvLSTMCell(
-            (conv): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
             )
             (2): ConvLSTMCell(
-            (conv): Conv2d(192, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (conv): Conv3d(192, 512, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(2, 2, 2), dilation=(2, 2, 2))
             )
         )
     )
+    in : torch.Size([8, 36, 12, 24, 72])
+    out : torch.Size([8, 128, 12, 24, 72])
     '''
