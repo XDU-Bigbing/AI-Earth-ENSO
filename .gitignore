@@ -1,3 +1,4 @@
 *.nc
 *.npy
 .ipynb_checkpoints/
+.vscode

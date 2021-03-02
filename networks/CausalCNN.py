@@ -168,50 +168,6 @@ class CausalCNNEncoder(torch.nn.Module):
     def forward(self, x):
         return self.network(x)
 
-class unSqueezeChannels(torch.nn.Module):
-    """
-    Squeezes, in a three-dimensional tensor, the third dimension.
-    """
-    def __init__(self):
-        super(unSqueezeChannels, self).__init__()
-
-    def forward(self, x):
-        return torch.unsqueeze(x, 2)
-
-
-class reshape(torch.nn.Module):
-    """
-    Squeezes, in a three-dimensional tensor, the third dimension.
-    """
-    def __init__(self, args):
-        super(reshape, self).__init__()
-        self.args = args
-    def forward(self, x):
-        return x.view(*self.args)
-
-
-class Decoder(torch.nn.Module):
-    def __init__(self, out_channels, reduced_size, input_dim, timestep, kernel_size=3, stride=1, padding=1, out_padding=0):
-        super(Decoder, self).__init__()
-        
-        linear = torch.nn.Linear(out_channels, reduced_size)
-        #考虑此处是否添加leakyRelu
-        relu1 = torch.nn.LeakyReLU()
-        unsqueeze = unSqueezeChannels()
-        unsampling = torch.nn.Upsample(size=timestep)
-        convT = torch.nn.ConvTranspose1d(reduced_size, input_dim, kernel_size=kernel_size, stride=stride, padding=padding, output_padding=out_padding)
-        r1 = reshape((-1, input_dim * timestep))
-        # print("input_dim * timestep:", input_dim * timestep, input_dim, timestep)
-        linear1 = torch.nn.Linear(input_dim * timestep, input_dim * timestep * 3)
-        linear2 = torch.nn.Linear(input_dim * timestep * 3, input_dim * timestep)
-
-        r2 = reshape((-1, input_dim, timestep))
-        self.network = torch.nn.Sequential(linear, relu1, unsqueeze, unsampling, convT, r1, linear1, linear2, r2)
-
-    def forward(self, x):
-        return self.network(x)
-
-
 
 import numpy
 if __name__ == "__main__":
