@@ -38,18 +38,6 @@
 
 # 模型构建进度
 
-- `seq_length` 原始序列长度
-- `custom_length` 指定窗口大小
-
-- [x] Conv2dLSTM 神经单元实现与适配到多层网络（训练读入的是单个元素）
-```
-Input  x : (batch_size, seq_length, channels, height, width)
-Output h : (batch_size, seq_length, hidden_dim, height, width)
-       c : (batch_size, seq_length, hidden_dim, height, width)
-```
-- [x] Conv3dLSTM 神经单元实现与适配到多层网络（训练读入一个序列的元素）
-```
-Input  x : (batch_size, channels, seq_length, height, width)
-Output h : (batch_size, hidden_dim, seq_length, height, width)
-       c : (batch_size, hidden_dim, seq_length, height, width)
-```
+- [x] Conv2dLSTM 神经单元实现与适配到多层网络，训练读入的是单个元素，输入输出维度一致
+- [x] Conv3dLSTM 神经单元实现与适配到多层网络，训练读入一个序列的元素，输入输出维度一致
+- [x] 借鉴 `VGG16` 构建特征提取器，降低`height`和`width`的维度，提升`channels`的维度
