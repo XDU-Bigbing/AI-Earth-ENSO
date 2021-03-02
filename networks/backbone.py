@@ -44,6 +44,7 @@ class Extractor(nn.Module):
                                padding=(2, 2, 2))
 
 
+
     def forward(self, x):
         y = self.conv1(x)
         y = self.activation(y)
@@ -62,10 +63,6 @@ class Extractor(nn.Module):
         y = self.activation(y)
         y = self.pool(y)
 
-        return y
+        return y.view((x.shape[0],-1,x.shape[2]))
 
 
-x = torch.rand((32, 4, 12, 24, 72))
-model = Extractor()
-y = model(x)
-print(y.size())

@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 class ForecastNetPlus(nn.Module):
 
-    \\TODO 
+    # TODO 
 
     def __init__(self, encoder, regressor, decoder, sliding_window_size, output_seq_length, device):
         """
@@ -22,6 +22,7 @@ class ForecastNetPlus(nn.Module):
         self.decoder = decoder
         self.sliding_window_size = sliding_window_size
         self.output_seq_length = output_seq_length
+        self.device = device
 
     def forward(self, input_seq, is_training=False):
         """
@@ -38,7 +39,7 @@ class ForecastNetPlus(nn.Module):
 
         # First input
         next_cell_input = input_seq[:,:,0:self.sliding_window_size,:,:]
-        for i in range(self.out_seq_length):
+        for i in range(self.output_seq_length):
             hidden = self.encoder(next_cell_input)
             next_y = self.regressor(hidden)
             outputs_y[:,i] = next_y
