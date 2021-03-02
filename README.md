@@ -40,4 +40,6 @@
 
 - [x] Conv2dLSTM 神经单元实现与适配到多层网络，训练读入的是单个元素，输入输出维度一致
 - [x] Conv3dLSTM 神经单元实现与适配到多层网络，训练读入一个序列的元素，输入输出维度一致
+- [x] Forecastnet 多步时序预测网络实现
+- [x] Dilated Casual CNN 网路实现
 - [x] 借鉴 `VGG16` 构建特征提取器，降低`height`和`width`的维度，提升`channels`的维度
