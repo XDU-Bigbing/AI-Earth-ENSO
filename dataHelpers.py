@@ -1,12 +1,12 @@
-import netCDF4
+# import netCDF4
 import numpy as np
 import numpy.ma as ma
 import torch
 from torch.utils.data import Dataset
 
-class ENSODataset(Dataset):
+class ENSODatasetCDF4(Dataset):
 
-    def __init__(self, data_path, target_path, is_training=True):
+    def __init__(self, data_path, target_path=None, is_training=True):
         self.data = netCDF4.Dataset(data_path)
         self.is_training = is_training
         self.target = netCDF4.Dataset(target_path) if self.is_training else None
@@ -28,3 +28,24 @@ class ENSODataset(Dataset):
 
     def __len__(self):
         return self.data.variables['year'][:].shape[0]
+
+
+class ENSODataset(Dataset):
+
+    def __init__(self, data_path, target_path=None, is_training=True):
+        self.data = np.load(data_path).transpose(0,4,1,2,3)
+        self.is_training = is_training
+        self.target = np.load(target_path) if self.is_training else None
+        
+
+    def __getitem__(self, index):
+        data_np = self.data[index]
+        
+        if self.is_training:
+            target_np = self.target[index]
+            return data_np, data_np[:,12:,:,:],target_np[12:]
+        else:
+            return data_np
+
+    def __len__(self):
+        return self.data.shape[0]

@@ -39,14 +39,11 @@ def train():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = init_model(device)
 
-    dataset = ENSODataset('data/SODA_train.nc','data/SODA_label.nc')
-
-    tensor_dataloader = DataLoader(dataset,   # 封装的对象
-                               batch_size=2,     # 输出的batchsize
-                               shuffle=True)    # 只有1个进程
+    dataset = ENSODataset('data/soda_train.npy','data/soda_label.npy')
+    dataloader = DataLoader(dataset, batch_size=2, shuffle=True)    
 
 
-    for data, data_real, target_real in tensor_dataloader:
+    for data, data_real, target_real in dataloader:
         print(data.shape)
         print(data_real.shape)
         print(target_real.shape)
