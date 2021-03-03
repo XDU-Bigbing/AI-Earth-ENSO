@@ -1,6 +1,9 @@
+import numpy as np
 import torch
 from torch.nn import Linear, LeakyReLU
+from torch.utils.data import DataLoader
 from networks import net_params, backbone, CausalCNN, ForecastNet, kits
+from dataHelpers import ENSODataset
 
 
 def init_model(device):
@@ -36,11 +39,25 @@ def train():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = init_model(device)
 
-    x = torch.rand((36, 4, 12, 24, 72))
+    dataset = ENSODataset('data/SODA_train.nc','data/SODA_label.nc')
+
+    tensor_dataloader = DataLoader(dataset,   # 封装的对象
+                               batch_size=2,     # 输出的batchsize
+                               shuffle=True)    # 只有1个进程
+
+
+    for data, data_real, target_real in tensor_dataloader:
+        print(data.shape)
+        print(data_real.shape)
+        print(target_real.shape)
+
+    # x = np.random.rand((100, 36, 24, 72,4))
+    # y = np.random.rand((100, 36))
+
     # x = torch.rand((4, 1))
     # model = 
-    y = model(x)
-    print(y.size())
+    # y = model(x)
+    # print(y.size())
 
 
 if __name__ == "__main__":
