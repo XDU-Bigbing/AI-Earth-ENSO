@@ -9,6 +9,13 @@ from dataHelpers import ENSODataset
 from tqdm import tqdm
 from numpy import *
 
+def seed_torch(seed=2021):
+    random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    numpy.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
 
 def init_model(device):
     encoder_dccnn = CausalCNN.CausalCNNEncoder(**net_params.dccnn_params)
@@ -42,10 +49,11 @@ def gauss_loss(y_pred, y, sigma=2):
     return torch.exp(-torch.norm((y_pred-y)) / (2 * sigma ** 2))
 
 def train():
-
+    
     batch_size = 4
     epochs = 50
 
+    seed_torch(2021)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = init_model(device)
