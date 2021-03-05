@@ -2,13 +2,15 @@ import torch
 
 class unSqueezeChannels(torch.nn.Module):
     """
-    Squeezes, in a three-dimensional tensor, the third dimension.
+    Squeezes.
     """
-    def __init__(self):
+    def __init__(self, axis):
         super(unSqueezeChannels, self).__init__()
+        self.axis = axis
 
     def forward(self, x):
-        return torch.unsqueeze(x, 2)
+        return torch.unsqueeze(x, self.axis)
+
 
 class squeezeChannels(torch.nn.Module):
     
@@ -28,4 +30,11 @@ class reshape(torch.nn.Module):
         self.args = args
     def forward(self, x):
         return x.view(*self.args)
+
+class flatten(torch.nn.Module):
+    def __init__(self):
+        super(flatten, self).__init__()
+
+    def forward(self, x):
+        return x.view((x.shape[0], -1))
 

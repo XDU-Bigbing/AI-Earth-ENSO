@@ -16,36 +16,17 @@ dccnn_params = {
 }
 
 # Decoder
-decoder_params = [
-    # Linear 1
-    {
-        "in_features": 320,
-        "out_features": 512,
-        "bias" : True
-    },
-    # Linear 2
-    {
-        "in_features": 512,
-        "out_features": 1024,
-        "bias" : True
-    },
-    # Linear 3
-    {
-        "in_features": 1024,
-        "out_features": 4096,
-        "bias" : True
-    },
-    # Linear 4
-    {
-        "in_features": 4096,
-        "out_features": 6912,
-        "bias" : True
-    },
-]
-
-decoder_channels = 4
-decoder_H = 24
-decoder_W = 72
+decoder_params = {
+    "in_channels":320,
+    "reduced_size":160,
+    "input_dim":160,
+    "upsample_size_one":(12, 36),
+    "upsample_size_two":(24, 72),
+    "kernel_size":3,
+    "stride":1,
+    "padding":1,
+    "out_padding":1,
+}
 
 # Regressor
 regressor_params = [

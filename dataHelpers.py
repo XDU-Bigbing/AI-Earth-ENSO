@@ -3,13 +3,14 @@ import numpy as np
 import numpy.ma as ma
 import torch
 from torch.utils.data import Dataset
+import netCDF4 as nc
 
 class ENSODatasetCDF4(Dataset):
 
     def __init__(self, data_path, target_path=None, is_training=True):
-        self.data = netCDF4.Dataset(data_path)
+        self.data = nc.Dataset(data_path)
         self.is_training = is_training
-        self.target = netCDF4.Dataset(target_path) if self.is_training else None
+        self.target = nc.Dataset(target_path) if self.is_training else None
         
 
     def __getitem__(self, index):
