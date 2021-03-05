@@ -9,6 +9,7 @@ from networks import net_params, backbone, CausalCNN, ForecastNet, SimpleDecoder
 from dataHelpers import ENSODataset
 from tqdm import tqdm
 from numpy import *
+import utils, config
 
 
 def seed_torch(seed=2021):
@@ -67,14 +68,26 @@ def train():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = init_model(device)
 
+    utils.writelog("Model loaded to device")
+
     dataset = ENSODataset('/content/gdrive/MyDrive/SODA_DATA/soda_train.npy',
                           '/content/gdrive/MyDrive/SODA_DATA/soda_label.npy')
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    utils.writelog("Data Loaders created")
 
     lossfunc_x = MSELoss().cuda()
     lossfunc_y = MSELoss().cuda()
     optimizer = optim.Adam(model.parameters(), lr=1e-3)
+    # 学习率
+    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.8)
+    # 如果路径有预训练好的模型，则加载
+    if config.IS_CONTINUE:
+        model, start_epoch, optimizer, lr_scheduler = utils.get_checkpoint_state(
+            model, optimizer, lr_scheduler)
+        utils.writelog("Model loaded from previous trained")
 
+    utils.writelog("---------------- Training Started --------------")
+    min_loss = 10000000
     for epoch in range(epochs):
         t = tqdm(dataloader, leave=False, total=len(dataloader))
         loss_list = []
@@ -92,16 +105,23 @@ def train():
             loss2 = lossfunc_y(pred_y, target_y)
             loss = 0.1 * loss1 + loss2
 
-            # print('Loss: {} Loss1: {}, Loss2: {}'.format(loss.item(),loss1.item(),loss2.item()))
+            utils.writelog("epoch = {}, Loss: {} Loss1: {}, Loss2: {}'.format(loss.item(),loss1.item(),loss2.item()))
             t.set_postfix(Loss=loss.item(),
                           Loss1=loss1.item(),
                           Loss2=loss2.item())
             loss_list.append(loss.item())
 
+            # 只保留总误差最小的模型
+            if loss.item() < min_loss:
+                min_loss = loss.item()
+                utils.save_checkpoint_state(epoch, model, optimizer, lr_scheduler)
+                utils.writelog(">>>>>>>>>>>>>>>>>>>>> save min loss model <<<<<<<<<<<<<<<<<")
+
+            # 保存后在更新，否则更新后不一定是最小的
             loss.backward()
             optimizer.step()
 
-        print('Loss avarage:', mean(loss_list))
+        utils.writelog('========>> Epoch {} : Loss avarage:'.format(epoch), mean(loss_list))
 
 
 def test():
