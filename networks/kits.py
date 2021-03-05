@@ -1,5 +1,6 @@
 import torch
 
+
 class unSqueezeChannels(torch.nn.Module):
     """
     Squeezes.
@@ -13,7 +14,6 @@ class unSqueezeChannels(torch.nn.Module):
 
 
 class squeezeChannels(torch.nn.Module):
-    
     def __init__(self):
         super(squeezeChannels, self).__init__()
 
@@ -28,8 +28,10 @@ class reshape(torch.nn.Module):
     def __init__(self, args):
         super(reshape, self).__init__()
         self.args = args
+
     def forward(self, x):
         return x.view(*self.args)
+
 
 class flatten(torch.nn.Module):
     def __init__(self):
@@ -37,4 +39,3 @@ class flatten(torch.nn.Module):
 
     def forward(self, x):
         return x.view((x.shape[0], -1))
-

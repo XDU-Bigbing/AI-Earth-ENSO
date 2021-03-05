@@ -10,6 +10,7 @@ from dataHelpers import ENSODataset
 from tqdm import tqdm
 from numpy import *
 
+
 def seed_torch(seed=2021):
     random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
@@ -23,7 +24,9 @@ def init_model(device):
     encoder_dccnn = CausalCNN.CausalCNNEncoder(**net_params.dccnn_params)
     encoder = torch.nn.Sequential(backbone.Extractor(), encoder_dccnn)
 
-    regressor_linears = [Linear(**params) for params in net_params.regressor_params]
+    regressor_linears = [
+        Linear(**params) for params in net_params.regressor_params
+    ]
     i = 1
     while i < len(regressor_linears):
         regressor_linears.insert(i, LeakyReLU())
@@ -40,16 +43,19 @@ def init_model(device):
     # decoder = torch.nn.Sequential(*decoder_linears)
     decoder = SimpleDecoder.Decoder(**net_params.decoder_params)
 
-    model = ForecastNet.ForecastNetPlus(
-        encoder, regressor, decoder, net_params.sliding_window_size, net_params.output_seq_length, device
-    ).double()
+    model = ForecastNet.ForecastNetPlus(encoder, regressor, decoder,
+                                        net_params.sliding_window_size,
+                                        net_params.output_seq_length,
+                                        device).double()
 
     model.to(device)
 
     return model
 
+
 def gauss_loss(y_pred, y, sigma=2):
-    return 1-torch.exp(-torch.norm((y_pred-y)) / (2 * sigma ))
+    return 1 - torch.exp(-torch.norm((y_pred - y)) / (2 * sigma))
+
 
 def train():
 
@@ -61,10 +67,10 @@ def train():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = init_model(device)
 
-    dataset = ENSODataset('/content/gdrive/MyDrive/SODA_DATA/soda_train.npy','/content/gdrive/MyDrive/SODA_DATA/soda_label.npy')
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)    
+    dataset = ENSODataset('/content/gdrive/MyDrive/SODA_DATA/soda_train.npy',
+                          '/content/gdrive/MyDrive/SODA_DATA/soda_label.npy')
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-    
     lossfunc_x = MSELoss().cuda()
     lossfunc_y = MSELoss().cuda()
     optimizer = optim.Adam(model.parameters(), lr=1e-3)
@@ -72,8 +78,8 @@ def train():
     for epoch in range(epochs):
         t = tqdm(dataloader, leave=False, total=len(dataloader))
         loss_list = []
-        for i, (batch, target_x,target_y) in enumerate(t):
-            
+        for i, (batch, target_x, target_y) in enumerate(t):
+
             batch = batch.to(device)
             target_x = target_x.to(device)
             target_y = target_y.to(device)
@@ -84,16 +90,19 @@ def train():
             pred_x, pred_y = model(batch)
             loss1 = lossfunc_x(pred_x, target_x)
             loss2 = lossfunc_y(pred_y, target_y)
-            loss = 0.1*loss1+loss2
+            loss = 0.1 * loss1 + loss2
 
             # print('Loss: {} Loss1: {}, Loss2: {}'.format(loss.item(),loss1.item(),loss2.item()))
-            t.set_postfix(Loss=loss.item(),Loss1=loss1.item(),Loss2=loss2.item())
+            t.set_postfix(Loss=loss.item(),
+                          Loss1=loss1.item(),
+                          Loss2=loss2.item())
             loss_list.append(loss.item())
 
             loss.backward()
             optimizer.step()
 
-        print('Loss avarage:',mean(loss_list))
+        print('Loss avarage:', mean(loss_list))
+
 
 def test():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -101,9 +110,10 @@ def test():
 
     x = torch.rand((2, 4, 12, 24, 72))
     # x = torch.rand((4, 1))
-    # model = 
+    # model =
     y = model(x)
     print(y.size())
+
 
 if __name__ == "__main__":
     train()

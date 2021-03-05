@@ -4,8 +4,8 @@ import torch
 
 # 一个神经单元
 class ConvLSTMCell(nn.Module):
-
-    def __init__(self, input_dim, hidden_dim, kernel_size, bias, padding, dilation):
+    def __init__(self, input_dim, hidden_dim, kernel_size, bias, padding,
+                 dilation):
         """
         Initialize ConvLSTM cell.
         Parameters
@@ -39,7 +39,7 @@ class ConvLSTMCell(nn.Module):
                               bias=self.bias)
 
     def forward(self, input_tensor, cur_state):
-        # 上一时刻的输出 
+        # 上一时刻的输出
         h_cur, c_cur = cur_state
 
         # dim=1 横向拼接
@@ -47,7 +47,9 @@ class ConvLSTMCell(nn.Module):
 
         combined_conv = self.conv(combined)
         # 按照 self.hidden_dim 切分数据 dim=1 横向拆分
-        cc_i, cc_f, cc_o, cc_g = torch.split(combined_conv, self.hidden_dim, dim=1)
+        cc_i, cc_f, cc_o, cc_g = torch.split(combined_conv,
+                                             self.hidden_dim,
+                                             dim=1)
 
         # 记忆门
         i = torch.sigmoid(cc_i)
@@ -70,13 +72,22 @@ class ConvLSTMCell(nn.Module):
     # 用 0 初始化参数
     def init_hidden(self, batch_size, length, image_size):
         height, width = image_size
-        return (torch.zeros(batch_size, self.hidden_dim, length, height, width, device=self.conv.weight.device),
-                torch.zeros(batch_size, self.hidden_dim, length, height, width, device=self.conv.weight.device))
+        return (torch.zeros(batch_size,
+                            self.hidden_dim,
+                            length,
+                            height,
+                            width,
+                            device=self.conv.weight.device),
+                torch.zeros(batch_size,
+                            self.hidden_dim,
+                            length,
+                            height,
+                            width,
+                            device=self.conv.weight.device))
 
 
 # 神经单元组成的神经网络
 class ConvLSTM(nn.Module):
-
     """
     Parameters:
         input_dim: Number of channels in input
@@ -100,9 +111,15 @@ class ConvLSTM(nn.Module):
         >> _, last_states = convlstm(x)
         >> h = last_states[0][0]  # 0 for layer index, 0 for h index
     """
-
-    def __init__(self, input_dim, hidden_dim, kernel_size, num_layers, 
-                 padding, dilation, bias=True, return_all_layers=False):
+    def __init__(self,
+                 input_dim,
+                 hidden_dim,
+                 kernel_size,
+                 num_layers,
+                 padding,
+                 dilation,
+                 bias=True,
+                 return_all_layers=False):
         super(ConvLSTM, self).__init__()
 
         # 检查类型是否为元组或列表
@@ -129,14 +146,16 @@ class ConvLSTM(nn.Module):
         for i in range(0, self.num_layers):
             # h 的输出维度是 hidden_dim，所以能对接上
             # [channel, hidden_dim] [hidden_dim, hidden_dim]
-            cur_input_dim = self.input_dim if i == 0 else self.hidden_dim[i - 1]
+            cur_input_dim = self.input_dim if i == 0 else self.hidden_dim[i -
+                                                                          1]
 
-            cell_list.append(ConvLSTMCell(input_dim=cur_input_dim,
-                                          hidden_dim=self.hidden_dim[i],
-                                          kernel_size=self.kernel_size[i],
-                                          padding = self.padding,
-                                          dilation = self.dilation,
-                                          bias=self.bias))
+            cell_list.append(
+                ConvLSTMCell(input_dim=cur_input_dim,
+                             hidden_dim=self.hidden_dim[i],
+                             kernel_size=self.kernel_size[i],
+                             padding=self.padding,
+                             dilation=self.dilation,
+                             bias=self.bias))
 
         self.cell_list = nn.ModuleList(cell_list)
 
@@ -171,8 +190,8 @@ class ConvLSTM(nn.Module):
 
             h, c = hidden_state[layer_idx]
             # 读入一个序列
-            h, c = self.cell_list[layer_idx](input_tensor=cur_layer_input[:, :, :, :, :],
-                                             cur_state=[h, c])
+            h, c = self.cell_list[layer_idx](
+                input_tensor=cur_layer_input[:, :, :, :, :], cur_state=[h, c])
 
             # 每层网络之间的状态 c 是断的
             # 一个序列在一层的输出
@@ -194,13 +213,15 @@ class ConvLSTM(nn.Module):
     def _init_hidden(self, batch_size, length, image_size):
         init_states = []
         for i in range(self.num_layers):
-            init_states.append(self.cell_list[i].init_hidden(batch_size, length, image_size))
+            init_states.append(self.cell_list[i].init_hidden(
+                batch_size, length, image_size))
         return init_states
 
     @staticmethod
     def _check_kernel_size_consistency(kernel_size):
         if not (isinstance(kernel_size, tuple) or
-                (isinstance(kernel_size, list) and all([isinstance(elem, tuple) for elem in kernel_size]))):
+                (isinstance(kernel_size, list)
+                 and all([isinstance(elem, tuple) for elem in kernel_size]))):
             raise ValueError('`kernel_size` must be tuple or list of tuples')
 
     @staticmethod
@@ -229,14 +250,14 @@ if __name__ == "__main__":
 
     # 输入维度, 隐藏维度, kernel大小, 层数，batch在先，含有偏执项，返回全部层
     convlstm = ConvLSTM(input_dim=in_channels,
-                    hidden_dim=hidden_dim,
-                    kernel_size=kernel_size,
-                    dilation=dilation,
-                    padding=padding,
-                    num_layers=num_layers,
-                    bias=True,
-                    return_all_layers=False)
-    
+                        hidden_dim=hidden_dim,
+                        kernel_size=kernel_size,
+                        dilation=dilation,
+                        padding=padding,
+                        num_layers=num_layers,
+                        bias=True,
+                        return_all_layers=False)
+
     print(convlstm)
 
     # 返回最后的状态
@@ -247,7 +268,6 @@ if __name__ == "__main__":
 
     print(x.size())
     print(h.size())
-
     '''
     ConvLSTM(
         (cell_list): ModuleList(

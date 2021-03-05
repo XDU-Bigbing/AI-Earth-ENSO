@@ -47,7 +47,11 @@ class CausalConvolutionBlock(torch.nn.Module):
            non-residual convolutions.
     @param final Disables, if True, the last activation function.
     """
-    def __init__(self, in_channels, out_channels, kernel_size, dilation,
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 dilation,
                  final=False):
         super(CausalConvolutionBlock, self).__init__()
 
@@ -55,31 +59,34 @@ class CausalConvolutionBlock(torch.nn.Module):
         padding = (kernel_size - 1) * dilation
 
         # First causal convolution
-        conv1 = torch.nn.utils.weight_norm(torch.nn.Conv1d(
-            in_channels, out_channels, kernel_size,
-            padding=padding, dilation=dilation
-        ))
+        conv1 = torch.nn.utils.weight_norm(
+            torch.nn.Conv1d(in_channels,
+                            out_channels,
+                            kernel_size,
+                            padding=padding,
+                            dilation=dilation))
         # The truncation makes the convolution causal
         chomp1 = Chomp1d(padding)
         relu1 = torch.nn.LeakyReLU()
 
         # Second causal convolution
-        conv2 = torch.nn.utils.weight_norm(torch.nn.Conv1d(
-            out_channels, out_channels, kernel_size,
-            padding=padding, dilation=dilation
-        ))
+        conv2 = torch.nn.utils.weight_norm(
+            torch.nn.Conv1d(out_channels,
+                            out_channels,
+                            kernel_size,
+                            padding=padding,
+                            dilation=dilation))
         chomp2 = Chomp1d(padding)
         relu2 = torch.nn.LeakyReLU()
 
         # Causal network
-        self.causal = torch.nn.Sequential(
-            conv1, chomp1, relu1, conv2, chomp2, relu2
-        )
+        self.causal = torch.nn.Sequential(conv1, chomp1, relu1, conv2, chomp2,
+                                          relu2)
 
         # Residual connection
         self.upordownsample = torch.nn.Conv1d(
-            in_channels, out_channels, 1
-        ) if in_channels != out_channels else None
+            in_channels, out_channels,
+            1) if in_channels != out_channels else None
 
         # Final activation function
         self.relu = torch.nn.LeakyReLU() if final else None
@@ -117,15 +124,17 @@ class CausalCNN(torch.nn.Module):
 
         for i in range(depth):
             in_channels_block = in_channels if i == 0 else channels
-            layers += [CausalConvolutionBlock(
-                in_channels_block, channels, kernel_size, dilation_size
-            )]
+            layers += [
+                CausalConvolutionBlock(in_channels_block, channels,
+                                       kernel_size, dilation_size)
+            ]
             dilation_size *= 2  # Doubles the dilation size at each step
 
         # Last layer
-        layers += [CausalConvolutionBlock(
-            channels, out_channels, kernel_size, dilation_size
-        )]
+        layers += [
+            CausalConvolutionBlock(channels, out_channels, kernel_size,
+                                   dilation_size)
+        ]
 
         self.network = torch.nn.Sequential(*layers)
 
@@ -155,15 +164,13 @@ class CausalCNNEncoder(torch.nn.Module):
     def __init__(self, in_channels, channels, depth, reduced_size,
                  out_channels, kernel_size):
         super(CausalCNNEncoder, self).__init__()
-        causal_cnn = CausalCNN(
-            in_channels, channels, depth, reduced_size, kernel_size
-        )
+        causal_cnn = CausalCNN(in_channels, channels, depth, reduced_size,
+                               kernel_size)
         reduce_size = torch.nn.AdaptiveMaxPool1d(1)
         squeeze = SqueezeChannels()  # Squeezes the third dimension (time)
         linear = torch.nn.Linear(reduced_size, out_channels)
-        self.network = torch.nn.Sequential(
-            causal_cnn, reduce_size, squeeze, linear
-        )
+        self.network = torch.nn.Sequential(causal_cnn, reduce_size, squeeze,
+                                           linear)
 
     def forward(self, x):
         return self.network(x)
@@ -187,4 +194,3 @@ if __name__ == "__main__":
     # z = encoderNet(X_train)
     decoderNet = Decoder(320, 160, 3, 315)
     print(decoderNet)
-

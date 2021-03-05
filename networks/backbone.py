@@ -22,8 +22,7 @@ class Extractor(nn.Module):
                                out_channels=8,
                                kernel_size=self.kernel_size,
                                padding=(2, 2, 2))
-        self.pool = nn.MaxPool3d(kernel_size=(3, 3, 3),
-                                  stride=(1, 2, 2))
+        self.pool = nn.MaxPool3d(kernel_size=(3, 3, 3), stride=(1, 2, 2))
 
         self.bn2 = nn.BatchNorm3d(8, affine=True)
         self.conv3 = nn.Conv3d(in_channels=8,
@@ -68,7 +67,8 @@ class Extractor(nn.Module):
         y = self.activation(y)
         y = self.pool(y)
 
-        return y.view((x.shape[0],-1,x.shape[2]))
+        return y.view((x.shape[0], -1, x.shape[2]))
+
 
 # m = Extractor()
 # x = torch.rand((32, 4, 12, 24, 72))
