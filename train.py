@@ -1,4 +1,5 @@
 import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 import numpy as np
 import torch
 torch.set_default_tensor_type(torch.DoubleTensor)
@@ -60,8 +61,8 @@ def gauss_loss(y_pred, y, sigma=2):
 
 def train():
 
-    batch_size = 4
-    epochs = 50
+    # batch_size = 4
+    # epochs = 50
 
     seed_torch(2021)
 
@@ -70,14 +71,14 @@ def train():
 
     utils.writelog("Model loaded to device")
 
-    dataset = ENSODataset('/content/gdrive/MyDrive/SODA_DATA/soda_train.npy',
-                          '/content/gdrive/MyDrive/SODA_DATA/soda_label.npy')
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    dataset = ENSODataset('data/soda_train.npy',
+                          'data/soda_label.npy')
+    dataloader = DataLoader(dataset, batch_size=config.TRAIN_BATCH_SIZE, shuffle=True)
     utils.writelog("Data Loaders created")
 
     lossfunc_x = MSELoss().cuda()
     lossfunc_y = MSELoss().cuda()
-    optimizer = optim.Adam(model.parameters(), lr=1e-3)
+    optimizer = optim.Adam(model.parameters(), lr=config.LEARNING_RATE)
     # 学习率
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.8)
     # 如果路径有预训练好的模型，则加载
@@ -88,7 +89,7 @@ def train():
 
     utils.writelog("---------------- Training Started --------------")
     min_loss = 10000000
-    for epoch in range(epochs):
+    for epoch in range(config.EPOCHS):
         t = tqdm(dataloader, leave=False, total=len(dataloader))
         loss_list = []
         for i, (batch, target_x, target_y) in enumerate(t):
@@ -105,7 +106,7 @@ def train():
             loss2 = lossfunc_y(pred_y, target_y)
             loss = 0.1 * loss1 + loss2
 
-            utils.writelog("epoch = {}, Loss: {} Loss1: {}, Loss2: {}'.format(loss.item(),loss1.item(),loss2.item()))
+            utils.writelog("epoch = {}, Loss: {} Loss1: {}, Loss2: {}".format(loss.item(),loss1.item(),loss2.item()))
             t.set_postfix(Loss=loss.item(),
                           Loss1=loss1.item(),
                           Loss2=loss2.item())
@@ -114,7 +115,7 @@ def train():
             # 只保留总误差最小的模型
             if loss.item() < min_loss:
                 min_loss = loss.item()
-                utils.save_checkpoint_state(epoch, model, optimizer, lr_scheduler)
+                utils.save_checkpoint_state(epoch, model, optimizer, lr_scheduler, '{}-model.pth'.format(epoch))
                 utils.writelog(">>>>>>>>>>>>>>>>>>>>> save min loss model <<<<<<<<<<<<<<<<<")
 
             # 保存后在更新，否则更新后不一定是最小的

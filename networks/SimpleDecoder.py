@@ -1,5 +1,5 @@
 import torch
-from kits import unSqueezeChannels, reshape, flatten
+from .kits import unSqueezeChannels, reshape, flatten
 
 
 class Decoder(torch.nn.Module):
