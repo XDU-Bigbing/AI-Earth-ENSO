@@ -16,13 +16,15 @@ dccnn_params = {
 decoder_params = {
     "in_channels": 320,
     "reduced_size": 160,
-    "input_dim": 160,
-    "upsample_size_one": (12, 36),
-    "upsample_size_two": (24, 72),
+    "input_dim": 4,
+    # "upsample_size_one": (12, 36),
+    "upsample_size_one": (24, 72),
+    # "upsample_size_two": (24, 72),
     "kernel_size": 3,
     "stride": 1,
     "padding": 1,
-    "out_padding": 1,
+    "out_padding": 0,
+    # "out_padding": 1,
 }
 
 # Regressor

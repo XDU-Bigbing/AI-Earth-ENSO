@@ -1,5 +1,5 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 import numpy as np
 import torch
 torch.set_default_tensor_type(torch.DoubleTensor)
@@ -67,7 +67,10 @@ def train():
     seed_torch(2021)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print(device)
     model = init_model(device)
+
+    print("init model finish")
 
     utils.writelog("Model loaded to device")
 
@@ -106,23 +109,26 @@ def train():
             loss2 = lossfunc_y(pred_y, target_y)
             loss = 0.1 * loss1 + loss2
 
-            utils.writelog("epoch = {}, Loss: {} Loss1: {}, Loss2: {}".format(loss.item(),loss1.item(),loss2.item()))
+            utils.writelog("epoch = {}, Loss: {} Loss1: {}, Loss2: {}".format(epoch, loss.item(),loss1.item(),loss2.item()))
             t.set_postfix(Loss=loss.item(),
                           Loss1=loss1.item(),
                           Loss2=loss2.item())
             loss_list.append(loss.item())
 
             # 只保留总误差最小的模型
-            if loss.item() < min_loss:
-                min_loss = loss.item()
-                utils.save_checkpoint_state(epoch, model, optimizer, lr_scheduler, '{}-model.pth'.format(epoch))
-                utils.writelog(">>>>>>>>>>>>>>>>>>>>> save min loss model <<<<<<<<<<<<<<<<<")
+
 
             # 保存后在更新，否则更新后不一定是最小的
             loss.backward()
             optimizer.step()
 
-        utils.writelog('========>> Epoch {} : Loss avarage:'.format(epoch), mean(loss_list))
+        
+        loss_mean = mean(loss_list)
+        utils.writelog('========>> Epoch {} : Loss avarage: {}'.format(epoch, loss_mean))
+        if loss_mean < min_loss:
+            min_loss = loss_mean
+            utils.save_checkpoint_state(epoch, model, optimizer, lr_scheduler, config.MODEL_SAVE_PATH+'{}-model.pth'.format(epoch))
+            utils.writelog(">>>>>>>>>>>>>>>>>>>>> save min loss model <<<<<<<<<<<<<<<<<")
 
 
 def test():
