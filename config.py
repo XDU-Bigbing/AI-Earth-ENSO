@@ -11,5 +11,5 @@ TRAIN_BATCH_SIZE = 4
 
 IS_CONTINUE = False
 # 模型保存路径与加载路径
-MODEL_LOAD_PATH = ""
-MODEL_SAVE_PATH = ""
+MODEL_LOAD_PATH = "model.pth"
+MODEL_SAVE_PATH = "model.pth"

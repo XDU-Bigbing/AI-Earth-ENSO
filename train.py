@@ -74,16 +74,19 @@ def train():
 
     utils.writelog("Model loaded to device")
 
-    dataset = ENSODataset('data/soda_train.npy',
-                          'data/soda_label.npy')
-    dataloader = DataLoader(dataset, batch_size=config.TRAIN_BATCH_SIZE, shuffle=True)
+    dataset = ENSODataset('data/soda_train.npy', 'data/soda_label.npy')
+    dataloader = DataLoader(dataset,
+                            batch_size=config.TRAIN_BATCH_SIZE,
+                            shuffle=True)
     utils.writelog("Data Loaders created")
 
     lossfunc_x = MSELoss().cuda()
     lossfunc_y = MSELoss().cuda()
     optimizer = optim.Adam(model.parameters(), lr=config.LEARNING_RATE)
     # 学习率
-    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.8)
+    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
+                                                   step_size=5,
+                                                   gamma=0.8)
     # 如果路径有预训练好的模型，则加载
     if config.IS_CONTINUE:
         model, start_epoch, optimizer, lr_scheduler = utils.get_checkpoint_state(
@@ -109,38 +112,58 @@ def train():
             loss2 = lossfunc_y(pred_y, target_y)
             loss = 0.1 * loss1 + loss2
 
-            utils.writelog("epoch = {}, Loss: {} Loss1: {}, Loss2: {}".format(epoch, loss.item(),loss1.item(),loss2.item()))
+            utils.writelog("epoch = {}, Loss: {} Loss1: {}, Loss2: {}".format(
+                epoch, loss.item(), loss1.item(), loss2.item()))
             t.set_postfix(Loss=loss.item(),
                           Loss1=loss1.item(),
                           Loss2=loss2.item())
             loss_list.append(loss.item())
 
-            # 只保留总误差最小的模型
-
-
             # 保存后在更新，否则更新后不一定是最小的
             loss.backward()
             optimizer.step()
 
-        
         loss_mean = mean(loss_list)
-        utils.writelog('========>> Epoch {} : Loss avarage: {}'.format(epoch, loss_mean))
+        utils.writelog('========>> Epoch {} : Loss avarage: {}'.format(
+            epoch, loss_mean))
         if loss_mean < min_loss:
             min_loss = loss_mean
-            utils.save_checkpoint_state(epoch, model, optimizer, lr_scheduler, config.MODEL_SAVE_PATH+'{}-model.pth'.format(epoch))
-            utils.writelog(">>>>>>>>>>>>>>>>>>>>> save min loss model <<<<<<<<<<<<<<<<<")
+            utils.save_checkpoint_state(
+                epoch, model, optimizer, lr_scheduler,
+                config.MODEL_SAVE_PATH)
+            utils.writelog(
+                ">>>>>>>>>>>>>>>>>>>>> save min loss model in epoch {}<<<<<<<<<<<<<<<<<".format(epoch))
 
 
 def test():
+    seed_torch(2021)
+
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = init_model(device)
 
-    x = torch.rand((2, 4, 12, 24, 72))
-    # x = torch.rand((4, 1))
-    # model =
-    y = model(x)
-    print(y.size())
+    optimizer = optim.Adam(model.parameters(), lr=config.LEARNING_RATE)
+    # 学习率
+    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
+                                                   step_size=5,
+                                                   gamma=0.8)
+
+    load_path = config.MODEL_LOAD_PATH
+    checkpoint = torch.load(load_path)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    epoch = checkpoint['epoch']
+    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    lr_scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+
+    path = "tcdata/enso_round1_test_20210201"
+    files = os.listdir(path)
+    for file in files:
+        data = np.load(file)
+        _, pred_y = model(data)
+        np.save('result/{}'.format(file), pred_y)
 
 
 if __name__ == "__main__":
     train()
+    # docker 提交注释掉 train() 
+    # 不知道阿里镜像有没有提供参数解析库
+    test()
