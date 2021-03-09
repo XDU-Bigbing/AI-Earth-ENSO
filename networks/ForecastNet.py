@@ -26,7 +26,7 @@ class ForecastNetPlus(nn.Module):
         self.output_seq_length = output_seq_length
         self.device = device
 
-    def forward(self, input_seq, is_training=False):
+    def forward(self, input_seq, is_training=True):
         """
         Forward propagation of the dense ForecastNet model
         :param input_seq: Input data in the form [B,C,T,W,H]

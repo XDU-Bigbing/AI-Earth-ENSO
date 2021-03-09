@@ -107,7 +107,7 @@ def train():
             optimizer.zero_grad()
             model.train()
 
-            pred_x, pred_y = model(batch)
+            pred_x, pred_y = model(batch, is_training=True)
             loss1 = lossfunc_x(pred_x, target_x)
             loss2 = lossfunc_y(pred_y, target_y)
             loss = 0.1 * loss1 + loss2
