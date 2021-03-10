@@ -8,5 +8,9 @@ ADD . /
 # 指定默认工作目录为根目录（需要把run.sh和生成的结果文件都放在该文件夹下，提交后才能运行）
 WORKDIR /
 
+# 装包
+RUN pip --no-cache-dir install tqdm -i https://mirrors.aliyun.com/pypi/simple
+RUN pip --no-cache-dir install numpy -i https://mirrors.aliyun.com/pypi/simple
+
 # 镜像启动后统一执行 sh run.sh
 CMD ["sh", "run.sh"]

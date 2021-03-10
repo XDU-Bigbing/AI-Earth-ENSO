@@ -52,9 +52,6 @@ def gauss_loss(y_pred, y, sigma=2):
 
 def test():
 
-    # batch_size = 4
-    # epochs = 50
-
     seed_torch(2021)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -94,7 +91,7 @@ def test():
             if os.path.exists("result"):
                 np.save("result/{}".format(file))
             else:
-                os.makedirs("result")
+                os.mkdir("result")
                 np.save("result/{}".format(file))
 
 
