@@ -164,6 +164,3 @@ def test():
 
 if __name__ == "__main__":
     train()
-    # docker 提交注释掉 train() 
-    # 不知道阿里镜像有没有提供参数解析库
-    test()
