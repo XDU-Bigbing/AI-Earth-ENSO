@@ -7,7 +7,6 @@ from torch.utils.data import DataLoader
 import torch.optim as optim
 from networks import net_params, backbone, CausalCNN, ForecastNet, SimpleDecoder, kits
 from dataHelpers import ENSODataset
-from tqdm import tqdm
 from numpy import *
 import utils, config
 
@@ -82,9 +81,8 @@ def test():
         dataset = ENSODataset(file, is_training=False)
         dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
         utils.writelog("Data Loaders created")
-        t = tqdm(dataloader, leave=False, total=len(dataloader))
 
-        for i, batch in enumerate(t):
+        for i, batch in enumerate(dataloader):
 
             batch = batch.to(device)
 
