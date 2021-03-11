@@ -32,7 +32,9 @@ class ENSODatasetCDF4(Dataset):
 
 class ENSODataset(Dataset):
     def __init__(self, data_path, target_path=None, is_training=True):
-        self.data = np.load(data_path).transpose(0, 4, 1, 2, 3)
+        self.data = np.load(data_path)
+        self.data = np.expand_dims(self.data, axis=0)
+        self.data = self.data.transpose(0, 4, 1, 2, 3)
         self.is_training = is_training
         self.target = np.load(target_path) if self.is_training else None
 

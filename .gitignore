@@ -8,3 +8,4 @@ __pycache__/*
 *.drawio
 result/*
 tcdata/*
+*.zip

@@ -63,19 +63,19 @@ def test():
                                                    step_size=5,
                                                    gamma=0.8)
 
-    model, start_epoch, optimizer, lr_scheduler = utils.get_checkpoint_state(
-        model, optimizer, lr_scheduler)
+    # model, start_epoch, optimizer, lr_scheduler = utils.get_checkpoint_state(
+    #     model, optimizer, lr_scheduler)
     model.eval()
     print("Model loaded from previous trained")
 
     path = "tcdata/enso_round1_test_20210201"
     files = os.listdir(path)
     cnt = 0
+    print("Data Loaders creating...")
     for file in files:
 
-        dataset = ENSODataset(file, is_training=False)
+        dataset = ENSODataset("tcdata/enso_round1_test_20210201/" + file, is_training=False)
         dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
-        print("Data Loaders created")
 
         for i, batch in enumerate(dataloader):
 
@@ -86,11 +86,7 @@ def test():
             print("test {} data over".format(cnt))
             cnt += 1
 
-            if os.path.exists("result"):
-                np.save("result/{}".format(file))
-            else:
-                os.mkdir("result")
-                np.save("result/{}".format(file))
+            np.save("result/{}".format(file), pred_y.detach().numpy())
 
 
 def make_zip(source_dir='./result/', output_filename = 'result.zip'):
