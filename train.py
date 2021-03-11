@@ -9,12 +9,11 @@ import torch.optim as optim
 from networks import net_params, backbone, CausalCNN, ForecastNet, SimpleDecoder, kits
 from dataHelpers import ENSODataset
 from tqdm import tqdm
-from numpy import *
 import utils, config
 
 
 def seed_torch(seed=2021):
-    random.seed(seed)
+    np.random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)

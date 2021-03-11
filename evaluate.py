@@ -7,12 +7,11 @@ from torch.utils.data import DataLoader
 import torch.optim as optim
 from networks import net_params, backbone, CausalCNN, ForecastNet, SimpleDecoder, kits
 from dataHelpers import ENSODataset
-from numpy import *
 import utils, config
 
 
 def seed_torch(seed=2021):
-    random.seed(seed)
+    np.random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -57,7 +56,7 @@ def test():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = init_model(device)
 
-    utils.writelog("Model loaded to device")
+    print("Model loaded to device")
 
     optimizer = optim.Adam(model.parameters(), lr=config.LEARNING_RATE)
     # 学习率
@@ -68,7 +67,7 @@ def test():
     model, start_epoch, optimizer, lr_scheduler = utils.get_checkpoint_state(
         model, optimizer, lr_scheduler)
     model.eval()
-    utils.writelog("Model loaded from previous trained")
+    print("Model loaded from previous trained")
 
     path = "tcdata/enso_round1_test_20210201"
     files = os.listdir(path)
@@ -77,7 +76,7 @@ def test():
 
         dataset = ENSODataset(file, is_training=False)
         dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
-        utils.writelog("Data Loaders created")
+        print("Data Loaders created")
 
         for i, batch in enumerate(dataloader):
 
@@ -85,7 +84,7 @@ def test():
 
             _, pred_y = model(batch, is_training=False)
 
-            utils.writelog("test {} data over".format(cnt))
+            print("test {} data over".format(cnt))
             cnt += 1
 
             if os.path.exists("result"):
