@@ -86,7 +86,7 @@ def test():
             print("test {} data over".format(cnt))
             cnt += 1
 
-            np.save("result/{}".format(file), pred_y.detach().numpy())
+            np.save("result/{}".format(file), pred_y.detach().cpu().numpy())
 
 
 def make_zip(source_dir='./result/', output_filename = 'result.zip'):

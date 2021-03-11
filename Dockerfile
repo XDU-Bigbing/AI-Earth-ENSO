@@ -11,6 +11,8 @@ WORKDIR /
 # 装包
 RUN pip --no-cache-dir install tqdm -i https://mirrors.aliyun.com/pypi/simple
 RUN pip --no-cache-dir install numpy -i https://mirrors.aliyun.com/pypi/simple
+RUN pip --no-cache-dir install netCDF4 -i https://mirrors.aliyun.com/pypi/simple
+RUN pip --no-cache-dir install zipfile36 -i https://mirrors.aliyun.com/pypi/simple
 
 # 镜像启动后统一执行 sh run.sh
 CMD ["sh", "run.sh"]
