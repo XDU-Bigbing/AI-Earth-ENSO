@@ -1,6 +1,5 @@
-import os
+import os, torch, zipfile
 import numpy as np
-import torch
 torch.set_default_tensor_type(torch.DoubleTensor)
 from torch.nn import Linear, LeakyReLU, MSELoss
 from torch.utils.data import DataLoader
@@ -94,5 +93,20 @@ def test():
                 np.save("result/{}".format(file))
 
 
+def make_zip(source_dir='./result/', output_filename = 'result.zip'):
+    zipf = zipfile.ZipFile(output_filename, 'w')
+    pre_len = len(os.path.dirname(source_dir))
+    source_dirs = os.walk(source_dir)
+    print(source_dirs)
+    for parent, dirnames, filenames in source_dirs:
+        for filename in filenames:
+            if '.npy' not in filename:
+                continue
+            pathfile = os.path.join(parent, filename)
+            arcname = pathfile[pre_len:].strip(os.path.sep)   #相对路径
+            zipf.write(pathfile, arcname)
+    zipf.close()
+
 if __name__ == "__main__":
     test()
+    make_zip()
