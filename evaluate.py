@@ -54,14 +54,7 @@ def test():
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = init_model(device)
-
     print("Model loaded to device")
-
-    optimizer = optim.Adam(model.parameters(), lr=config.LEARNING_RATE)
-    # 学习率
-    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
-                                                   step_size=5,
-                                                   gamma=0.8)
 
     load_path = "./model.pth"
     model.load_state_dict(torch.load(load_path)['model_state_dict'])
@@ -72,24 +65,23 @@ def test():
     files = os.listdir(path)
     cnt = 0
     print("Data Loaders creating...")
+
     for file in files:
 
-        dataset = ENSODataset("./tcdata/enso_round1_test_20210201/" + file, is_training=False)
+        dataset = ENSODataset("./tcdata/enso_round1_test_20210201/" + file,
+                              is_training=False)
         dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
 
         for i, batch in enumerate(dataloader):
-
             batch = batch.to(device)
-
             _, pred_y = model(batch, is_training=False)
-
+            pred_y = pred_y.reshape(-1)
             print("test {} data over".format(cnt))
             cnt += 1
-
             np.save("./result/{}".format(file), pred_y.detach().cpu().numpy())
 
 
-def make_zip(source_dir='./result/', output_filename = 'result.zip'):
+def make_zip(source_dir='./result/', output_filename='result.zip'):
     zipf = zipfile.ZipFile(output_filename, 'w')
     pre_len = len(os.path.dirname(source_dir))
     source_dirs = os.walk(source_dir)
@@ -99,7 +91,7 @@ def make_zip(source_dir='./result/', output_filename = 'result.zip'):
             if '.npy' not in filename:
                 continue
             pathfile = os.path.join(parent, filename)
-            arcname = pathfile[pre_len:].strip(os.path.sep)   #相对路径
+            arcname = pathfile[pre_len:].strip(os.path.sep)  #相对路径
             zipf.write(pathfile, arcname)
     zipf.close()
 

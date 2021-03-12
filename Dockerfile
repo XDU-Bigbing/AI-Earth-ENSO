@@ -10,8 +10,8 @@ ADD . /
 WORKDIR /
 
 # 装包
-RUN pip --no-cache-dir uninstall torch
-RUN pip --no-cache-dir install torch==1.7.1+cu101 -i https://mirrors.aliyun.com/pypi/simple
+# 会卸载自带的，默认的版本不支持
+RUN pip --no-cache-dir install torch==1.7.1+cu101 -f https://download.pytorch.org/whl/torch_stable.html
 RUN pip --no-cache-dir install tqdm -i https://mirrors.aliyun.com/pypi/simple
 RUN pip --no-cache-dir install numpy -i https://mirrors.aliyun.com/pypi/simple
 RUN pip --no-cache-dir install netCDF4 -i https://mirrors.aliyun.com/pypi/simple
