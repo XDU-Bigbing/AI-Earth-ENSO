@@ -63,18 +63,18 @@ def test():
                                                    step_size=5,
                                                    gamma=0.8)
 
-    # model, start_epoch, optimizer, lr_scheduler = utils.get_checkpoint_state(
-    #     model, optimizer, lr_scheduler)
+    load_path = "./model.pth"
+    model.load_state_dict(torch.load(load_path)['model_state_dict'])
     model.eval()
     print("Model loaded from previous trained")
 
-    path = "tcdata/enso_round1_test_20210201"
+    path = "./tcdata/enso_round1_test_20210201"
     files = os.listdir(path)
     cnt = 0
     print("Data Loaders creating...")
     for file in files:
 
-        dataset = ENSODataset("tcdata/enso_round1_test_20210201/" + file, is_training=False)
+        dataset = ENSODataset("./tcdata/enso_round1_test_20210201/" + file, is_training=False)
         dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
 
         for i, batch in enumerate(dataloader):
@@ -86,7 +86,7 @@ def test():
             print("test {} data over".format(cnt))
             cnt += 1
 
-            np.save("result/{}".format(file), pred_y.detach().cpu().numpy())
+            np.save("./result/{}".format(file), pred_y.detach().cpu().numpy())
 
 
 def make_zip(source_dir='./result/', output_filename = 'result.zip'):
@@ -102,6 +102,7 @@ def make_zip(source_dir='./result/', output_filename = 'result.zip'):
             arcname = pathfile[pre_len:].strip(os.path.sep)   #相对路径
             zipf.write(pathfile, arcname)
     zipf.close()
+
 
 if __name__ == "__main__":
     test()

@@ -1,7 +1,8 @@
 # docker 基础镜像构建
 # https://tianchi.aliyun.com/forum/postDetail?spm=5176.12586973.0.0.b17922323IJaDN&postId=67720
-FROM registry.cn-shanghai.aliyuncs.com/tcc-public/pytorch:latest-cuda9.0-py3  
+FROM registry.cn-shanghai.aliyuncs.com/tcc-public/pytorch:1.4-cuda10.1-py3  
 
+USER root
 # 把当前文件夹里的文件构建到镜像的根目录下
 ADD . /
 
@@ -9,6 +10,8 @@ ADD . /
 WORKDIR /
 
 # 装包
+RUN pip --no-cache-dir uninstall torch
+RUN pip --no-cache-dir install torch==1.7.1+cu101 -i https://mirrors.aliyun.com/pypi/simple
 RUN pip --no-cache-dir install tqdm -i https://mirrors.aliyun.com/pypi/simple
 RUN pip --no-cache-dir install numpy -i https://mirrors.aliyun.com/pypi/simple
 RUN pip --no-cache-dir install netCDF4 -i https://mirrors.aliyun.com/pypi/simple
